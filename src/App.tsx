@@ -1,0 +1,81 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
+import { AuthScreen } from './components/AuthScreen';
+import { Navbar } from './components/Navbar';
+import { Sidebar } from './components/Sidebar';
+import { ChatArea } from './components/ChatArea';
+import { CreateRoomModal } from './components/CreateRoomModal';
+import { AdminDashboard } from './components/AdminDashboard';
+import { ApiDocsModal } from './components/ApiDocsModal';
+import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
+import { DockerDevOpsGuide } from './components/DockerDevOpsGuide';
+import { EvaluationChecklistModal } from './components/EvaluationChecklistModal';
+
+const MainApp: React.FC = () => {
+  const { user, isLoading } = useAuth();
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState<boolean>(false);
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+  const [isApiDocsOpen, setIsApiDocsOpen] = useState<boolean>(false);
+  const [isDbSchemaOpen, setIsDbSchemaOpen] = useState<boolean>(false);
+  const [isDockerGuideOpen, setIsDockerGuideOpen] = useState<boolean>(false);
+  const [isChecklistOpen, setIsChecklistOpen] = useState<boolean>(false);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+          <p className="text-xs font-medium text-slate-400">Loading NexusChat Evaluation Suite...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  return (
+    <SocketProvider>
+      <div className="min-h-screen bg-slate-950 flex flex-col font-sans antialiased text-slate-100">
+        <Navbar
+          onOpenApiDocs={() => setIsApiDocsOpen(true)}
+          onOpenDbSchema={() => setIsDbSchemaOpen(true)}
+          onOpenDockerGuide={() => setIsDockerGuideOpen(true)}
+          onOpenChecklist={() => setIsChecklistOpen(true)}
+          onOpenAdmin={() => setIsAdminOpen(true)}
+        />
+
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <Sidebar onOpenCreateRoom={() => setIsCreateRoomOpen(true)} />
+          <ChatArea />
+        </div>
+
+        {/* Modals */}
+        <CreateRoomModal isOpen={isCreateRoomOpen} onClose={() => setIsCreateRoomOpen(false)} />
+        <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+        <ApiDocsModal isOpen={isApiDocsOpen} onClose={() => setIsApiDocsOpen(false)} />
+        <DatabaseSchemaModal isOpen={isDbSchemaOpen} onClose={() => setIsDbSchemaOpen(false)} />
+        <DockerDevOpsGuide isOpen={isDockerGuideOpen} onClose={() => setIsDockerGuideOpen(false)} />
+        <EvaluationChecklistModal isOpen={isChecklistOpen} onClose={() => setIsChecklistOpen(false)} />
+      </div>
+    </SocketProvider>
+  );
+};
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NexusChat Real-Time Full-Stack Chat Application",
+  "description": "Production-grade MERN stack real-time chat application with Socket.IO, JWT Auth, RBAC, MongoDB Mongoose models, Docker & DevOps evaluation checklist tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

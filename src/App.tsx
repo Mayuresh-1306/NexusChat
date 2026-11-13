@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
+import { SocketProvider, useSocket } from './context/SocketContext';
 import { AuthScreen } from './components/AuthScreen';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
@@ -17,6 +17,32 @@ import { ApiDocsModal } from './components/ApiDocsModal';
 import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
 import { DockerDevOpsGuide } from './components/DockerDevOpsGuide';
 import { EvaluationChecklistModal } from './components/EvaluationChecklistModal';
+
+const ResponsiveChatView: React.FC<{ onOpenCreateRoom: () => void }> = ({ onOpenCreateRoom }) => {
+  const { activeRoom, setActiveRoom } = useSocket();
+
+  return (
+    <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+      {/* Sidebar: Full screen on mobile when no active room, fixed w-80 on desktop */}
+      <div
+        className={`w-full md:w-80 md:flex-shrink-0 flex-col h-full border-r border-slate-200 dark:border-slate-800 ${
+          activeRoom ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        <Sidebar onOpenCreateRoom={onOpenCreateRoom} />
+      </div>
+
+      {/* Chat Area: Full screen on mobile when active room selected, flex-1 on desktop */}
+      <div
+        className={`flex-1 flex-col h-full min-w-0 ${
+          activeRoom ? 'flex' : 'hidden md:flex'
+        }`}
+      >
+        <ChatArea onBackToSidebar={() => setActiveRoom(null)} />
+      </div>
+    </div>
+  );
+};
 
 const MainApp: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -44,7 +70,7 @@ const MainApp: React.FC = () => {
 
   return (
     <SocketProvider>
-      <div className="min-h-screen bg-slate-950 flex flex-col font-sans antialiased text-slate-100">
+      <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors">
         <Navbar
           onOpenApiDocs={() => setIsApiDocsOpen(true)}
           onOpenDbSchema={() => setIsDbSchemaOpen(true)}
@@ -53,12 +79,9 @@ const MainApp: React.FC = () => {
           onOpenAdmin={() => setIsAdminOpen(true)}
         />
 
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          <Sidebar onOpenCreateRoom={() => setIsCreateRoomOpen(true)} />
-          <ChatArea />
-        </div>
+        <ResponsiveChatView onOpenCreateRoom={() => setIsCreateRoomOpen(true)} />
 
-        {/* Modals */}
+        {/* Evaluation & Action Modals */}
         <CreateRoomModal isOpen={isCreateRoomOpen} onClose={() => setIsCreateRoomOpen(false)} />
         <AdminDashboard isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
         <ApiDocsModal isOpen={isApiDocsOpen} onClose={() => setIsApiDocsOpen(false)} />

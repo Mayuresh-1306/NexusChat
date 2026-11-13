@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateRoom }) => {
   );
 
   return (
-    <aside className="w-full md:w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex flex-col h-[calc(100vh-4rem)] transition-colors">
+    <aside className="w-full h-full bg-slate-50 dark:bg-slate-900/50 flex flex-col transition-colors overflow-hidden">
       {/* Search & Tabs Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between mb-3">

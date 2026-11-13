@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
-import { Send, Paperclip, Hash, Lock, Users, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, Hash, Lock, Users, Sparkles, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 
-export const ChatArea: React.FC = () => {
+interface ChatAreaProps {
+  onBackToSidebar?: () => void;
+}
+
+export const ChatArea: React.FC<ChatAreaProps> = ({ onBackToSidebar }) => {
   const { activeRoom, messages, sendMessage, typingUsers, startTyping, stopTyping } = useSocket();
   const { user } = useAuth();
   const [inputText, setInputText] = useState<string>('');
@@ -40,7 +44,16 @@ export const ChatArea: React.FC = () => {
 
   if (!activeRoom) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-900/20 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-slate-900/20">
+        {onBackToSidebar && (
+          <button
+            onClick={onBackToSidebar}
+            className="md:hidden mb-4 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Browse Rooms & Users
+          </button>
+        )}
         <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mb-4 border border-indigo-500/20">
           <Hash className="w-8 h-8" />
         </div>
@@ -55,31 +68,41 @@ export const ChatArea: React.FC = () => {
   const currentTyping = typingUsers[activeRoom._id] || [];
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-4rem)] bg-white dark:bg-slate-950 transition-colors">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 transition-colors overflow-hidden">
       {/* Chat Room Header */}
-      <div className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-            {activeRoom.isPrivate ? <Lock className="w-5 h-5" /> : <Hash className="w-5 h-5" />}
+      <div className="h-16 px-4 sm:px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {onBackToSidebar && (
+            <button
+              onClick={onBackToSidebar}
+              className="md:hidden p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              title="Back to rooms"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 flex-shrink-0">
+            {activeRoom.isPrivate ? <Lock className="w-4 h-4 sm:w-5 sm:h-5" /> : <Hash className="w-4 h-4 sm:w-5 sm:h-5" />}
           </div>
-          <div>
-            <h2 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              {activeRoom.name}
+          <div className="min-w-0">
+            <h2 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-1.5 truncate">
+              <span className="truncate">{activeRoom.name}</span>
               {activeRoom.isPrivate && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium border border-amber-500/20">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 font-medium border border-amber-500/20 flex-shrink-0">
                   Private
                 </span>
               )}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs sm:max-w-md">
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[170px] sm:max-w-md">
               {activeRoom.description || 'Real-time chat room'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
-          <Users className="w-4 h-4 text-indigo-500" />
-          <span>{activeRoom.members?.length || 1} Members</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 sm:px-3 py-1.5 rounded-xl flex-shrink-0">
+          <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500" />
+          <span className="hidden sm:inline">{activeRoom.members?.length || 1} Members</span>
+          <span className="sm:hidden">{activeRoom.members?.length || 1}</span>
         </div>
       </div>
 

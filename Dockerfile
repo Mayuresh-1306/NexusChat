@@ -11,11 +11,11 @@ RUN npm install
 # 4. Copy Source Code
 COPY . .
 
-# 5. Build Vite React Frontend & TypeScript Server
+# 5. Build Vite React Frontend
 RUN npm run build
 
-# 6. Expose Port
+# 6. Expose Application Port
 EXPOSE 3000
 
-# 7. Start Application
-CMD ["npm", "run", "dev"]
+# 7. Start Application (Production Server)
+CMD ["npm", "start"]

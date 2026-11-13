@@ -124,9 +124,9 @@ const messageSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-export const User = mongoose.models.User || mongoose.model('User', userSchema);
-export const ChatRoom = mongoose.models.ChatRoom || mongoose.model('ChatRoom', chatRoomSchema);
-export const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+export const User: any = mongoose.models.User || mongoose.model('User', userSchema);
+export const ChatRoom: any = mongoose.models.ChatRoom || mongoose.model('ChatRoom', chatRoomSchema);
+export const Message: any = mongoose.models.Message || mongoose.model('Message', messageSchema);
 
 async function connectDB() {
   await initSeedData();

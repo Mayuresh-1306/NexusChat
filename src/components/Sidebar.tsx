@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
+import { useDebounce } from '../hooks/useDebounce';
 import { ChatRoom, User } from '../types';
 import { Hash, Plus, Search, Users, Shield, Circle, Lock } from 'lucide-react';
 
@@ -12,6 +13,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateRoom }) => {
   const { rooms, activeRoom, setActiveRoom } = useSocket();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const debouncedSearch = useDebounce(searchTerm, 250);
   const [usersList, setUsersList] = useState<User[]>([]);
   const [tab, setTab] = useState<'rooms' | 'users'>('rooms');
 
@@ -36,13 +38,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateRoom }) => {
   }, []);
 
   const filteredRooms = rooms.filter(room =>
-    room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    room.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    room.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    room.description?.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   const filteredUsers = usersList.filter(u =>
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    u.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   return (

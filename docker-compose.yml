@@ -7,8 +7,9 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - MONGO_URI=mongodb://mongo:27017/nexus_chat
-      - JWT_SECRET=nexus_chat_secure_secret_2026
+      - NODE_ENV=production
+      - MONGO_URI=${MONGO_URI:-mongodb://mongo:27017/nexus_chat}
+      - JWT_SECRET=${JWT_SECRET:-nexus_chat_secure_secret_2026}
     depends_on:
       - mongo
     restart: always

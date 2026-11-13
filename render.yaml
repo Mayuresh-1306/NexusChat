@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: nexus-chat
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: nexus_chat_secure_jwt_secret_key_2026
+      - key: MONGO_URI
+        sync: false

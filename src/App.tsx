@@ -17,6 +17,7 @@ import { ApiDocsModal } from './components/ApiDocsModal';
 import { DatabaseSchemaModal } from './components/DatabaseSchemaModal';
 import { DockerDevOpsGuide } from './components/DockerDevOpsGuide';
 import { EvaluationChecklistModal } from './components/EvaluationChecklistModal';
+import { NotificationToasts } from './components/NotificationToasts';
 
 const ResponsiveChatView: React.FC<{ onOpenCreateRoom: () => void }> = ({ onOpenCreateRoom }) => {
   const { activeRoom, setActiveRoom } = useSocket();
@@ -78,6 +79,8 @@ const MainApp: React.FC = () => {
           onOpenChecklist={() => setIsChecklistOpen(true)}
           onOpenAdmin={() => setIsAdminOpen(true)}
         />
+
+        <NotificationToasts />
 
         <ResponsiveChatView onOpenCreateRoom={() => setIsCreateRoomOpen(true)} />
 

@@ -3,6 +3,14 @@ import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { ChatRoom, Message } from '../types';
 
+export interface NotificationToast {
+  id: string;
+  title: string;
+  message: string;
+  type: 'message' | 'room' | 'info';
+  timestamp: Date;
+}
+
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
@@ -17,6 +25,8 @@ interface SocketContextType {
   stopTyping: (roomId: string) => void;
   fetchRooms: () => Promise<void>;
   fetchMessages: (roomId: string) => Promise<void>;
+  notifications: NotificationToast[];
+  dismissNotification: (id: string) => void;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -29,6 +39,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<{ [roomId: string]: string[] }>({});
+  const [notifications, setNotifications] = useState<NotificationToast[]>([]);
+
+  const dismissNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
 
   const fetchRooms = async () => {
     if (!token) return;
@@ -95,14 +110,46 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     newSocket.on('new_message', (message: Message) => {
       setMessages(prev => {
-        // Avoid duplicate messages
         if (prev.some(m => m._id === message._id)) return prev;
         return [...prev, message];
       });
+
+      // Trigger real-time visual notification if sender is another user
+      const isMe = message.sender?._id === user?.id || (message.sender as any) === user?.id;
+      if (!isMe) {
+        const toastId = 'notif_' + Date.now() + Math.random().toString(36).substring(2, 6);
+        const newToast: NotificationToast = {
+          id: toastId,
+          title: `New Message from ${message.sender?.name || 'Someone'}`,
+          message: message.content,
+          type: 'message',
+          timestamp: new Date()
+        };
+        setNotifications(prev => [newToast, ...prev].slice(0, 4));
+
+        // Auto dismiss after 4.5 seconds
+        setTimeout(() => {
+          dismissNotification(toastId);
+        }, 4500);
+      }
     });
 
     newSocket.on('room_created', (newRoom: ChatRoom) => {
       setRooms(prev => [newRoom, ...prev]);
+
+      const toastId = 'room_' + Date.now();
+      const newToast: NotificationToast = {
+        id: toastId,
+        title: 'New Room Created',
+        message: `Channel "${newRoom.name}" has been created.`,
+        type: 'room',
+        timestamp: new Date()
+      };
+      setNotifications(prev => [newToast, ...prev].slice(0, 4));
+
+      setTimeout(() => {
+        dismissNotification(toastId);
+      }, 4500);
     });
 
     newSocket.on('room_deleted', (roomId: string) => {
@@ -174,7 +221,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         startTyping,
         stopTyping,
         fetchRooms,
-        fetchMessages
+        fetchMessages,
+        notifications,
+        dismissNotification
       }}
     >
       {children}
